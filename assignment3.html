@@ -1,0 +1,162 @@
+<html>
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+  
+</style>
+
+<body>
+  <!-- d3 v6 integration -->
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+
+  <script>
+
+    let width = 960,
+      height = 500;
+
+    function forceCluster() {
+      const strength = 0.2;
+      let nodes;
+
+      function force(alpha) {
+        const centroids = d3.rollup(nodes, centroid, d => d.data.group);
+        const l = alpha * strength;
+        for (const d of nodes) {
+          const {x: cx, y: cy} = centroids.get(d.data.group);
+          d.vx -= (d.x - cx) * l;
+          d.vy -= (d.y - cy) * l;
+        }
+      }
+
+      force.initialize = _ => nodes = _;
+
+      return force;
+    }
+
+    function forceCollide() {
+      const alpha = 0.4; // fixed for greater rigidity!
+      const padding1 = 2; // separation between same-color nodes
+      const padding2 = 6; // separation between different-color nodes
+      let nodes;
+      let maxRadius;
+
+      function force() {
+        const quadtree = d3.quadtree(nodes, d => d.x, d => d.y);
+        for (const d of nodes) {
+          const r = d.r + maxRadius;
+          const nx1 = d.x - r, ny1 = d.y - r;
+          const nx2 = d.x + r, ny2 = d.y + r;
+          quadtree.visit((q, x1, y1, x2, y2) => {
+            if (!q.length) do {
+              if (q.data !== d) {
+                const r = d.r + q.data.r + (d.data.group === q.data.data.group ? padding1 : padding2);
+                let x = d.x - q.data.x, y = d.y - q.data.y, l = Math.hypot(x, y);
+                if (l < r) {
+                  l = (l - r) / l * alpha;
+                  d.x -= x *= l, d.y -= y *= l;
+                  q.data.x += x, q.data.y += y;
+                }
+              }
+            } while (q = q.next);
+            return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
+          });
+        }
+      }
+
+      force.initialize = _ => maxRadius = d3.max(nodes = _, d => d.r) + Math.max(padding1, padding2);
+
+      return force;
+    }
+
+    pack = (data) => d3.pack()
+        .size([width, height])
+        .padding(1)
+      (d3.hierarchy(data)
+        .sum(d => d.value))
+
+    function centroid(nodes) {
+        let x = 0;
+        let y = 0;
+        let z = 0;
+        for (const d of nodes) {
+          let k = d.r ** 2;
+          x += d.x * k;
+          y += d.y * k;
+          z += k;
+        }
+        return {x: x / z, y: y / z};
+      }
+
+    let svg = d3.select("body").append("svg")
+      .attr("width", width)
+      .attr("height", height);
+
+    let color = d3.scaleOrdinal(d3.range(10), d3.schemeCategory10)
+
+    ready();
+
+
+    async function ready() {
+      let data = await d3.csv("MoviesOnStreamingPlatforms_updated.csv", function(d) {
+        return (
+          ({
+            children: Array.from(
+              d3.group(
+                Array.from({length: 1674}, (_, i) => ({
+                  group: d[_, "Genres"].split(",")[0],
+                  value: d
+                })),
+                d => d.group
+              ),
+              ([, children]) => ({children})
+            )
+          })
+        )
+      });
+      console.log("loaded data")
+      console.log(data[1]["Genres"].split(",")[0])
+      
+      const nodes = pack(data).leaves();
+
+      const simulation = d3.forceSimulation(nodes)
+          .force("x", d3.forceX(width / 2).strength(0.01))
+          .force("y", d3.forceY(height / 2).strength(0.01))
+          .force("cluster", forceCluster())
+          .force("collide", forceCollide());
+
+      // const svg = d3.select(svg(width, height));
+
+      const node = svg.append("g")
+        .selectAll("circle")
+        .data(nodes)
+        .join("circle")
+          .attr("cx", d => d.x)
+          .attr("cy", d => d.y)
+          .attr("fill", d => color(d.data.group))
+          // .call(drag(simulation));
+
+      node.transition()
+          .delay((d, i) => Math.random() * 500)
+          .duration(750)
+          .attrTween("r", d => {
+            const i = d3.interpolate(0, d.r);
+            return t => d.r = i(t);
+          });
+
+      simulation.on("tick", () => {
+        node
+            .attr("cx", d => d.x)
+            .attr("cy", d => d.y);
+      });
+
+      invalidation.then(() => simulation.stop());
+
+      return svg.node();
+    }
+
+
+  </script>
+
+  
+</body>
+</html>
