@@ -1,0 +1,107 @@
+<html>
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+  
+</style>
+
+<body>
+  <!-- d3 v6 integration -->
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  
+  <script>
+    let width = 1000,
+      height = 700;
+
+    let svg = d3.select("body").append("svg")
+      .attr("width", width)
+      .attr("height", height);
+
+    // call the function that draws
+    ready();
+
+
+    async function ready() {
+      // load files async; store the values so we can use them later
+        let data = await d3.csv("MoviesOnStreamingPlatforms_updated.csv");
+
+        let numberMoviesPerGenre = d3.rollup(
+            data,
+            d => d.length,
+            d => d.Genres.split(",")[0]
+        )
+        
+        let childrenAccessorFn = ([ key, value ]) => {
+            value.size && Array.from(value)
+        }
+
+        let hierarchyData = d3.hierarchy([null, numberMoviesPerGenre], childrenAccessorFn)
+            .sum(([key, value]) => value)
+            .sort((a, b) => b.value - a.value)
+
+        pack = () => d3.pack()
+            .size([width, height])
+            .padding(1)
+            (hierarchyData)
+
+        
+
+        // let group = Array.from(d3.group(data, d => d.Genres.split(",")[0]));
+        // console.log(group)
+        // // let hierarchy = d3.hierarchy(group);
+        
+        // let root = pack(data)
+        // console.log(root)
+
+        // const node = svg.selectAll("g")
+        //     .data(d3.group(root.descendants(), d => d.height))
+        //     .join("g")
+        //         // .attr("filter", shadow)
+        //     .selectAll("g")
+        //     .data(d => d[1])
+        //     .join("g")
+        //         .attr("transform", d => `translate(${d.x + 1},${d.y + 1})`);
+
+        // node.append("circle")
+        //     .attr("r", d => d.r)
+        //     // .attr("fill", d => color(d.height));
+            
+        // pack = data => d3.pack()
+        //     .size([width - 2, height - 2])
+        //     .padding(3)
+        //     (d3.hierarchy(group))
+
+    //   function col(d) {
+    //     let index = genre_array.indexOf(d.Genres.split(",")[0]);
+    //     let scale = d3.scaleLinear().domain([0,27]).range([0,1]);
+    //     return d3.interpolateTurbo(scale(index));
+    //   }
+
+    //   function pos(d, axis) {
+    //     let index = genre_array.indexOf(d.Genres.split(",")[0]);
+    //     let scale = d3.scaleLinear().domain([0,27]).range([0, axis]);
+    //     return scale(index);
+    //   }
+
+    //   var circle = svg.selectAll("circle")
+    //   .data(data)
+    //   .enter()
+    //   .append("circle")
+    //     .attr("cx", function(d) { return pos(d, width - 2)  })
+    //     .attr("cy",function(d) { return pos(d, height - 2) })
+    //     .attr("r", 3)
+    //     .style("stroke", "black")
+    //     .style("fill", function(d) { return col(d);})
+    //     .style("opacity", 0.5)
+    //     .on("mouseover", function(d,i){ d3.select(this).attr("r", 50); })
+    //     .on("mouseout", function(d,i){ d3.select(this).attr("r", 3); });
+
+      
+    }
+
+   
+
+  </script>
+
+</body>
+</html>
