@@ -25,26 +25,68 @@
       // load files async; store the values so we can use them later
         let data = await d3.csv("MoviesOnStreamingPlatforms_updated.csv");
 
-        let numberMoviesPerGenre = d3.rollup(
-            data,
-            d => d.length,
-            d => d.Genres.split(",")[0]
-        )
-        
-        let childrenAccessorFn = ([ key, value ]) => {
-            value.size && Array.from(value)
-        }
-
-        let hierarchyData = d3.hierarchy([null, numberMoviesPerGenre], childrenAccessorFn)
-            .sum(([key, value]) => value)
+        let root = d3.hierarchy(d3.rollup(data, d => d.length, d => d.Genres.split(",")[0]))
+            .sum(([, value]) => value)
             .sort((a, b) => b.value - a.value)
 
-        pack = () => d3.pack()
+        const pack = () => d3.pack()
             .size([width, height])
             .padding(1)
-            (hierarchyData)
+        (root)
 
-        
+        root = pack(data);
+
+        const genre_list = new Set();
+            for (i = 0; i < 16743; i++) {
+                let temp = data[i].Genres.split(",")
+                for (j = 0; j < temp.length; j++) {
+                genre_list.add(temp[j]);
+                }
+            }
+        let genre_array = Array.from(genre_list);
+
+        function col(d) {
+            let index = genre_array.indexOf(d.data[0]);
+            let scale = d3.scaleLinear().domain([0,27]).range([0,1]);
+            return d3.interpolateTurbo(scale(index));
+        }
+
+        console.log(root)
+
+        svg.append("g")
+            .attr("fill", "ccc")
+            .selectAll("circle")
+            .data(root.leaves())
+            .join("circle")
+                .attr("transform", d => `translate(${d.x},${d.y})`)
+                .attr("fill", d => col(d))
+                .attr("r", d => d.r)
+                .append("title")
+                    .text(d => d.data[0])
+                    .attr("x", function(d) {return d.x;})
+                    .attr("y", function(d) {return d.y;})
+                    .attr("opacity", .9)
+                
+
+                    // .attr("font-size", 14)
+                    // .attr("text-anchor", "middle")
+                        
+                    
+                // .text(d => `${d.ancestors().map(d => d.data[0]).reverse().join("/")}\n${format(d.value)}`);
+
+        // svg.append("g")
+        //     .attr("pointer-events", "none")
+        //     .attr("text-anchor", "middle")
+        // .selectAll("text")
+        // .data(root.leaves().filter(d => d.r > 2))
+        //     .join("text")
+        //     .attr("transform", d => `translate(${d.x},${d.y}) scale(${d.r / 30})`)
+        // .selectAll("tspan")
+        //     .data(d => (d.data[0] + "").split(/\s+/g))
+        //     .join("tspan")
+        //     .attr("x", 0)
+        //     .attr("y", (d, i, nodes) => `${i - nodes.length / 2 + 0.8}em`)
+        //     .text(d => d);
 
         // let group = Array.from(d3.group(data, d => d.Genres.split(",")[0]));
         // console.log(group)
