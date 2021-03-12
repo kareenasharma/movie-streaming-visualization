@@ -1,5 +1,16 @@
+<html>
+
 <!DOCTYPE html>
 <meta charset="utf-8">
+
+<body>
+<!--Checkboxes -->
+<input type="checkbox" class="streaming_platforms" value="Netflix"> Netflix </input>
+<input type="checkbox" class="streaming_platforms" value="Hulu"> Hulu </input>
+<input type="checkbox" class="streaming_platforms" value="Prime"> Prime </input>
+<input type="checkbox" class="streaming_platforms" value="Disney"> Disney+ </input>
+
+
 
 <!-- Load d3.js -->
 <script src="https://d3js.org/d3.v4.js"></script>
@@ -26,19 +37,19 @@
     //Read the data
     d3.csv("MoviesOnStreamingPlatforms_updated.csv", function(data) {
 
-    // creating age set and adding distinct genres
-    const age_list = new Set();
-    for (i = 0; i < 16743; i++) {
-        let temp = data[i].Age.split(",");
-        for (j = 0; j < temp.length; j++) {
-            age_list.add(temp[j]);
-        }
-    }
+      // creating age set and adding distinct genres
+      const age_list = new Set();
+      for (i = 0; i < 16743; i++) {
+          let temp = data[i].Age.split(",");
+          for (j = 0; j < temp.length; j++) {
+              age_list.add(temp[j]);
+          }
+      }
 
-    //convert age set to age array
-    let age_array = Array.from(age_list);
-    console.log(age_array);
-    
+      //convert age set to age array
+      let age_array = Array.from(age_list);
+      console.log(age_array);
+      
       // Add X axis
       var x = d3.scalePoint()
         // .domain([0, 6])
@@ -54,7 +65,7 @@
         .range([ height, 0]);
       svg.append("g")
         .call(d3.axisLeft(y));
-    
+      
       // Add dots
       svg.append('g')
         .selectAll("dot")
@@ -66,7 +77,59 @@
           .attr("r", 1.5)
           .style("fill", "#69b3a2")
 
+      
+      d3.selectAll(".streaming_platforms").on("change",update);
+  
+      update();
+
+      function update(){
+        var choices = [];
+        d3.selectAll(".streaming_platforms").each(function(d){
+          let cb = d3.select(this);
+          if(cb.property("checked")){
+            choices.push(cb.property("value"));
+          }
+        });
+
+        let newData;
+        // console.log(data.length)
+
+        if(choices.length > 0){
+          console.log(choices)
+          // checks if d is included in choice array
+        
+          newData = data.filter(function(d,i) {return (
+            choices.includes(d.Netflix == 1 ? "Netflix" : 0) ||
+            choices.includes(d.Hulu == 1 ? "Hulu" : 0) ||
+            choices.includes(d.Disney == 1 ? "Disney" : 0) ||
+            choices.includes(d.Prime == 1 ? "Prime" : 0));});
+          
+            console.log(newData.length)
+
+        } else {
+          newData = data;     
+        } 
+        
+        svg.append('g')
+          .selectAll("dot")
+          .data(newData)
+          .enter()
+          .append("circle")
+            .attr("cx", function (d) { return x(d.Age); } )
+            .attr("cy", function (d) { return y(d.IMDb); } )
+            .attr("r", 1.5)
+            .style("fill", "#69b3a2")
+          .exit()
+            .remove()
+      }
+
     
+
+
+    
+    // don't remove
     })
     
     </script>
+    </body>
+    </html>
