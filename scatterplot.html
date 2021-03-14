@@ -14,145 +14,9 @@
 
 
 <body>
-<!--Streaming Platform Checkboxes -->
-<div class="streaming_platforms">
-    <h2>Streaming Platforms</h2>
-    <div>
-      <input type="checkbox" class= "platform" value="Netflix"> Netflix </input>
-    </div>
-    
-    <div>
-      <input type="checkbox" class="platform" value="Hulu"> Hulu </input>
-    </div>
-
-    <div>
-      <input type="checkbox" class="platform" value="Prime"> Prime </input>
-    </div>
-
-    <div>
-      <input type="checkbox" class="platform" value="Disney"> Disney+ </input>
-    </div>
-</div>
-
-<!--Genre Checkboxes-->
-<div class = "subgenres">
-  <h2>Subgenres</h2>
-  <div>
-    <input type="checkbox" class= "subgenres" value="Action"> Action </input>
-  </div>
-  
-  <div>
-    <input type="checkbox" class="subgenres" value="Adventure"> Adventure </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class="subgenres" value="SciFi"> SciFi </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class="subgenres" value="Thriller"> Thriller </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class= "subgenres" value="Comedy"> Comedy </input>
-  </div>
-  
-  <div>
-    <input type="checkbox" class="subgenres" value="Western"> Western </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class="subgenres" value="Animation"> Animation </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class="subgenres" value="Family"> Family </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class= "subgenres" value="Biography"> Biography </input>
-  </div>
-  
-  <div>
-    <input type="checkbox" class="subgenres" value="Drama"> Drama </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class="subgenres" value="Music"> Music </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class="subgenres" value="War"> War </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class= "subgenres" value="Crime"> Crime </input>
-  </div>
-  
-  <div>
-    <input type="checkbox" class="subgenres" value="Fantasy"> Fantasy </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class="subgenres" value="Romance"> Romance </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class="subgenres" value="History"> History </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class= "subgenres" value="Mystery"> Mystery </input>
-  </div>
-  
-  <div>
-    <input type="checkbox" class="subgenres" value="Horror"> Horror </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class="subgenres" value="Sport"> Sport </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class="subgenres" value="Documentary"> Documentary </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class= "subgenres" value="Musical"> Musical </input>
-  </div>
-  
-  <div>
-    <input type="checkbox" class="subgenres" value="News"> News </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class="subgenres" value="Short"> Short </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class="subgenres" value="Reality-TV"> Reality-TV </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class="subgenres" value="Talk-Show"> Talk-Show </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class="subgenres" value="Game-Show"> Game-Show </input>
-  </div>
-
-  <div>
-    <input type="checkbox" class="subgenres" value="Film-Noir"> Film-Noir </input>
-  </div>
-
-</div>
-
-
-
 
 <div id="slider-container" class = "platform">
-<div id="range-label">1902 - 2020</div>
-
+  <div id="range-label">1902 - 2020</div>
 </div>
 
 <!-- <div class="slidecontainer" style='--a: -30; --b: 20; --min: -50; --max: 50'>
@@ -171,6 +35,7 @@
 
 <script>
 
+
 //   d3.select('#slider3').call(d3.slider().axis(true).value( [ 10, 25 ] )
 //     .on("slide", function(evt, value) {
 //       d3.select('#slider3textmin').text(value[ 0 ]);
@@ -180,11 +45,17 @@
   // let circle, newCircle;
     var genre = sessionStorage.getItem("genre");
     console.log(genre)
+    // d3.select('.genreTitle').appendHTML({genre});
+    var header = d3.select("body")
+      .append("div")
+      .attr("class", "header")
+    
+    header.html("Selected Genre:" + genre)
     
     // set the dimensions and margins of the graph
-    var margin = {top: 10, right: 30, bottom: 30, left: 60},
-        width = 460 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
+    var margin = {top: 10, right: 40, bottom: 40, left: 60},
+        width = 630 - margin.left - margin.right,
+        height = 600 - margin.top - margin.bottom;
     
     // append the svg object to the body of the page
     var svg = d3.select("#my_dataviz")
@@ -198,18 +69,21 @@
     //Read the data
     d3.csv("MoviesOnStreamingPlatforms_updated.csv", function(data) {
 
-      // creating languagee set and adding distinct languages
-      const language_list = new Set();
-      for (i = 0; i < 16743; i++) {
-        let temp = data[i].Language.split(",")
-        for (j = 0; j < temp.length; j++) {
-          language_list.add(temp[j]);
-        }
-      }
+      // creating language set and adding distinct languages
+      // const language_list = new Set();
+      // for (i = 0; i < 16743; i++) {
+      //   let temp = data[i].Language.split(",")
+      //   for (j = 0; j < temp.length; j++) {
+      //     language_list.add(temp[j]);
+      //   }
+      // }
 
       // create genre_list SET
       const genre_list = new Set();
         for (i = 0; i < 16743; i++) {
+          if (data[i].Age == "") {
+            data[i].Age = "Not Listed"
+          }
           let temp = data[i].Genres.split(",")
           for (j = 0; j < temp.length; j++) {
           genre_list.add(temp[j]);
@@ -251,15 +125,44 @@
         .append("div")
           .attr("class", "tooltip")
           .style("opacity", 0);
+
+      // age keys
+      let ageKeys = ["", "Not Listed", "all", "7+", "13+", "16+", "18+"];
+    
+
+      let ageDictionary = {
+        0 : "",
+        1 : "all",
+        2 : "7+",
+        3: "13+",
+        4: "16+",
+        5: "18+"
+      }
+
+
+
       
+
       // Add X axis
       var x = d3.scalePoint()
         // .domain([0, 6])
-        .domain(age_array)
+        // .domain([-0.1, (age_array.length - 1) * 1.1])
+        .domain(ageKeys)
         .range([ 0, width ]);
+
+      // let xaxisGenerator = d3.axisBottom(x)
+      //   .ticks(7)
+      //   .tickValues(["", "all", "7+", "13+", "16+","18+"])
+
       svg.append("g")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x));
+
+      svg.append("text")
+        .attr("transform", "translate(" + (width/2) + " ," + (height + margin.top + 20) + ")")
+        .style("text-anchor", "middle")
+        .text("Age Ratings");
+
     
       // Add Y axis
       var y = d3.scaleLinear()
@@ -267,6 +170,14 @@
         .range([ height, 0]);
       svg.append("g")
         .call(d3.axisLeft(y));
+
+      svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left)
+        .attr("x",0 - (height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("IMDb Scores");
       
       // Add circles
       svg.append('g')
@@ -278,7 +189,7 @@
         .append("circle")
           .attr("cx", function (d) { return x(d.Age); } )
           .attr("cy", function (d) { return y(d.IMDb); } )
-          .attr("r", 1.5)
+          .attr("r", 2.8)
           .style("fill", "#69b3a2")
           .on("mouseover", function(d) {
             tooltip.transition()
@@ -392,27 +303,179 @@
           .append("circle")
             .attr("cx", function (d) { return x(d.Age); } )
             .attr("cy", function (d) { return y(d.IMDb); } )
-            .attr("r", 1.5)
+            .attr("r", 2.8)
             .style("fill", "#69b3a2")
-            .on("mouseover", function(d) {
+
+          
+        circle
+          .on("mouseover", function(d,i){ d3.select(this).attr("r", 5);
               tooltip.transition()
+                
                 .duration(200)
                 .style("opacity", .9);
               tooltip
                 .html(d.Title + " - " + d.Year + ", " + d.Age + "<br/>" + "IMDb Score: " + d.IMDb + "<br/>" + "Runtime: " + d.Runtime + " minutes")
                 .style("left", (d3.event.pageX + 5) + "px")
-                .style("top", (d3.event.pageY -28) + "px");
-            })
-            .on("mouseout", function(d) {
+                .style("top", (d3.event.pageY -28) + "px"); })
+          .on("mouseout", function(d,i){ d3.select(this).attr("r", 2.8);
               tooltip.transition()
                 .duration(500)
                 .style("opacity", 0);
             });
+
+        // circle
+        //   .enter()
+        //   .append("circle")
+        //     .attr("cx", function (d) { return x(d.Age); } )
+        //     .attr("cy", function (d) { return y(d.IMDb); } )
+        //     .attr("r", 5)
+        //     .style("fill", "#69b3a2")
       }
 
     // don't remove
     })
     
     </script>
+
+<div class="streaming_platforms">
+  <h2>Streaming Platforms</h2>
+  <div>
+    <input type="checkbox" class= "platform" value="Netflix"> Netflix </input>
+  </div>
+  
+  <div>
+    <input type="checkbox" class="platform" value="Hulu"> Hulu </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="platform" value="Prime"> Prime </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="platform" value="Disney"> Disney+ </input>
+  </div>
+</div>
+
+<!--Genre Checkboxes-->
+<div class = "sub">
+<h2>Subgenres</h2>
+<div class = "sub2">
+
+<div>
+    <div>
+      <input type="checkbox" class= "subgenres" value="Action"> Action </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="Adventure"> Adventure </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="SciFi"> SciFi </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="Thriller"> Thriller </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class= "subgenres" value="Comedy"> Comedy </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="Western"> Western </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="Animation"> Animation </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="Family"> Family </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class= "subgenres" value="Biography"> Biography </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="Drama"> Drama </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="Music"> Music </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="War"> War </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class= "subgenres" value="Crime"> Crime </input>
+    </div>
+</div>
+
+
+<div>
+    <div>
+      <input type="checkbox" class="subgenres" value="Fantasy"> Fantasy </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="Romance"> Romance </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="History"> History </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class= "subgenres" value="Mystery"> Mystery </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="Horror"> Horror </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="Sport"> Sport </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="Documentary"> Documentary </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class= "subgenres" value="Musical"> Musical </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="News"> News </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="Short"> Short </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="Reality-TV"> Reality-TV </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="Talk-Show"> Talk-Show </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="Game-Show"> Game-Show </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="subgenres" value="Film-Noir"> Film-Noir </input>
+    </div>
+</div>
+</div>
+
+</div>
+
     </body>
     </html>

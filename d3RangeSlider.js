@@ -121,7 +121,7 @@ function createD3RangeSlider (rangeMin, rangeMax, containerSelector, playButton)
 
     /** Update the `left` and `width` attributes of `slider` based on `sliderRange` */
     function updateUIFromRange () {
-        var conW = sliderBox.node().clientWidth;
+        var conW = 0.5*sliderBox.node().clientWidth;
         var rangeW = sliderRange.end - sliderRange.begin;
         var slope = (conW - minWidth) / (rangeMax - rangeMin);
         var uirangeW = minWidth + rangeW * slope;
