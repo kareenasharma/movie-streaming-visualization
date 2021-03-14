@@ -3,12 +3,163 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 
+<!-- Style the page -->
+<link rel="stylesheet" href="scatterplot.css">
+
+<!-- Range slider code -->
+<script src="d3RangeSlider.js"></script>
+
+<!-- Range slider style -->
+<link href="d3RangeSlider.css" rel="stylesheet">
+
+
 <body>
-<!--Checkboxes -->
-<input type="checkbox" class="streaming_platforms" value="Netflix"> Netflix </input>
-<input type="checkbox" class="streaming_platforms" value="Hulu"> Hulu </input>
-<input type="checkbox" class="streaming_platforms" value="Prime"> Prime </input>
-<input type="checkbox" class="streaming_platforms" value="Disney"> Disney+ </input>
+<!--Streaming Platform Checkboxes -->
+<div class="streaming_platforms">
+    <h2>Streaming Platforms</h2>
+    <div>
+      <input type="checkbox" class= "platform" value="Netflix"> Netflix </input>
+    </div>
+    
+    <div>
+      <input type="checkbox" class="platform" value="Hulu"> Hulu </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="platform" value="Prime"> Prime </input>
+    </div>
+
+    <div>
+      <input type="checkbox" class="platform" value="Disney"> Disney+ </input>
+    </div>
+</div>
+
+<!--Genre Checkboxes-->
+<div class = "subgenres">
+  <h2>Subgenres</h2>
+  <div>
+    <input type="checkbox" class= "subgenres" value="Action"> Action </input>
+  </div>
+  
+  <div>
+    <input type="checkbox" class="subgenres" value="Adventure"> Adventure </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="subgenres" value="SciFi"> SciFi </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="subgenres" value="Thriller"> Thriller </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class= "subgenres" value="Comedy"> Comedy </input>
+  </div>
+  
+  <div>
+    <input type="checkbox" class="subgenres" value="Western"> Western </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="subgenres" value="Animation"> Animation </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="subgenres" value="Family"> Family </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class= "subgenres" value="Biography"> Biography </input>
+  </div>
+  
+  <div>
+    <input type="checkbox" class="subgenres" value="Drama"> Drama </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="subgenres" value="Music"> Music </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="subgenres" value="War"> War </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class= "subgenres" value="Crime"> Crime </input>
+  </div>
+  
+  <div>
+    <input type="checkbox" class="subgenres" value="Fantasy"> Fantasy </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="subgenres" value="Romance"> Romance </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="subgenres" value="History"> History </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class= "subgenres" value="Mystery"> Mystery </input>
+  </div>
+  
+  <div>
+    <input type="checkbox" class="subgenres" value="Horror"> Horror </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="subgenres" value="Sport"> Sport </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="subgenres" value="Documentary"> Documentary </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class= "subgenres" value="Musical"> Musical </input>
+  </div>
+  
+  <div>
+    <input type="checkbox" class="subgenres" value="News"> News </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="subgenres" value="Short"> Short </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="subgenres" value="Reality-TV"> Reality-TV </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="subgenres" value="Talk-Show"> Talk-Show </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="subgenres" value="Game-Show"> Game-Show </input>
+  </div>
+
+  <div>
+    <input type="checkbox" class="subgenres" value="Film-Noir"> Film-Noir </input>
+  </div>
+
+</div>
+
+
+
+
+<div id="slider-container" class = "platform">
+<div id="range-label">1902 - 2020</div>
+
+</div>
+
+<!-- <div class="slidecontainer" style='--a: -30; --b: 20; --min: -50; --max: 50'>
+  <input type="range" min="1" max="100" value="50" id="a">
+  <input type="range" min="1" max="100" value="50" id="b">
+</div> -->
+
 
 
 
@@ -19,6 +170,14 @@
 <div id="my_dataviz"></div>
 
 <script>
+
+//   d3.select('#slider3').call(d3.slider().axis(true).value( [ 10, 25 ] )
+//     .on("slide", function(evt, value) {
+//       d3.select('#slider3textmin').text(value[ 0 ]);
+//       d3.select('#slider3textmax').text(value[ 1 ]);
+// })
+
+  // let circle, newCircle;
 
     // set the dimensions and margins of the graph
     var margin = {top: 10, right: 30, bottom: 30, left: 60},
@@ -37,6 +196,37 @@
     //Read the data
     d3.csv("MoviesOnStreamingPlatforms_updated.csv", function(data) {
 
+      // creating languagee set and adding distinct languages
+      const language_list = new Set();
+      for (i = 0; i < 16743; i++) {
+        let temp = data[i].Language.split(",")
+        for (j = 0; j < temp.length; j++) {
+          language_list.add(temp[j]);
+        }
+      }
+
+      // // create genre_list SET
+      // const genre_list = new Set();
+      // for (i = 0; i < 16743; i++) {
+      //   let temp = data[i].Language.split(",")
+      //   for (j = 0; j < temp.length; j++) {
+      //     genre_list.add(temp[j]);
+      //   }
+      // }
+
+      // // set genres as keys
+      // let genres = [];
+      // for (let i of genre_list) {
+      //   genres[i] = [];
+      // }
+
+      // // adding all relevant data to the genres dictionary
+      // for (i = 0; i < data.length; i++) {
+      //   let temp = data[i].Genres.split(",")[0];
+      //   genres[temp].push(data[i]);
+      // }
+
+
       // creating age set and adding distinct genres
       const age_list = new Set();
       for (i = 0; i < 16743; i++) {
@@ -48,7 +238,6 @@
 
       //convert age set to age array
       let age_array = Array.from(age_list);
-      console.log(age_array);
       
       // Add X axis
       var x = d3.scalePoint()
@@ -66,9 +255,11 @@
       svg.append("g")
         .call(d3.axisLeft(y));
       
-      // Add dots
+      // Add circles
       svg.append('g')
-        .selectAll("dot")
+        .attr("id", "circles")
+        .selectAll("circle")
+        // circle
         .data(data)
         .enter()
         .append("circle")
@@ -78,55 +269,106 @@
           .style("fill", "#69b3a2")
 
       
-      d3.selectAll(".streaming_platforms").on("change",update);
+      d3.selectAll(".platform").on("change",update);
+      d3.selectAll(".subgenres").on("change",update);
+
+      var slider = createD3RangeSlider(1902, 2020, "#slider-container");
+      slider.range(1902,2020);
   
       update();
 
-      function update(){
+      function update() {
+
         var choices = [];
-        d3.selectAll(".streaming_platforms").each(function(d){
+        d3.selectAll(".platform").each(function(d) {
           let cb = d3.select(this);
-          if(cb.property("checked")){
+          if(cb.property("checked")) {
             choices.push(cb.property("value"));
           }
         });
 
-        let newData;
-        // console.log(data.length)
+        var subgenreChoices = [];
+        d3.selectAll(".subgenres").each(function(d){
+          let cb = d3.select(this);
+          if(cb.property("checked")) {
+            subgenreChoices.push(cb.property("value"));
+          }
+        });
 
-        if(choices.length > 0){
-          console.log(choices)
+        let newData, sliderData;
+
+
+        if(choices.length > 0 || subgenreChoices.length > 0) {
+
           // checks if d is included in choice array
-        
-          newData = data.filter(function(d,i) {return (
+          newData = data.filter(function(d,i) {
+            
+          let dataGenres = d.Genres.split(",");
+
+          let checker = (arr, target) => target.some(v => arr.includes(v));
+
+          let platforms = 
             choices.includes(d.Netflix == 1 ? "Netflix" : 0) ||
             choices.includes(d.Hulu == 1 ? "Hulu" : 0) ||
             choices.includes(d.Disney == 1 ? "Disney" : 0) ||
-            choices.includes(d.Prime == 1 ? "Prime" : 0));});
-          
-            console.log(newData.length)
+            choices.includes(d.Prime == 1 ? "Prime" : 0)
 
-        } else {
+          // if (choices.length == 0 || subgenreChoices.length == 0) {
+          //     return platforms || checker(dataGenres, subgenreChoices)
+          // }
+
+          if ((choices.length > 0) && (subgenreChoices.length == 0)) {
+            // console.log(choices)
+            return platforms
+          }
+
+          else if ((choices.length == 0) && (subgenreChoices.length > 0)) {
+              // console.log("checker")
+              return checker(dataGenres, subgenreChoices)
+          }
+
+          else {
+              // console.log(checker(dataGenres, subgenreChoices))
+              return platforms && checker(dataGenres, subgenreChoices)
+              }
+          }
+
+        )}
+
+        else {
           newData = data;     
-        } 
+        }
+
+      // }); 
         
-        svg.append('g')
-          .selectAll("dot")
-          .data(newData)
+        sliderData = newData;
+        let returnSlider = slider.onChange(function(newRange){
+            d3.select("#range-label").text(newRange.begin + " - " + newRange.end);
+            update();
+          return
+        });
+
+        sliderData = newData.filter(function(d, i) {
+            return (d.Year >= returnSlider.range(slider).begin && d.Year <= returnSlider.range(slider).end)
+          })
+
+        let circle = svg.select("g#circles")
+            .selectAll("circle")
+            .data(sliderData)
+
+        circle
+          .exit()
+            .remove()
+
+        circle
           .enter()
           .append("circle")
             .attr("cx", function (d) { return x(d.Age); } )
             .attr("cy", function (d) { return y(d.IMDb); } )
             .attr("r", 1.5)
             .style("fill", "#69b3a2")
-          .exit()
-            .remove()
       }
 
-    
-
-
-    
     // don't remove
     })
     
