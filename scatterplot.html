@@ -178,7 +178,9 @@
 // })
 
   // let circle, newCircle;
-
+    var genre = sessionStorage.getItem("genre");
+    console.log(genre)
+    
     // set the dimensions and margins of the graph
     var margin = {top: 10, right: 30, bottom: 30, left: 60},
         width = 460 - margin.left - margin.right,
@@ -205,31 +207,38 @@
         }
       }
 
-      // // create genre_list SET
-      // const genre_list = new Set();
-      // for (i = 0; i < 16743; i++) {
-      //   let temp = data[i].Language.split(",")
-      //   for (j = 0; j < temp.length; j++) {
-      //     genre_list.add(temp[j]);
-      //   }
-      // }
+      // create genre_list SET
+      const genre_list = new Set();
+        for (i = 0; i < 16743; i++) {
+          let temp = data[i].Genres.split(",")
+          for (j = 0; j < temp.length; j++) {
+          genre_list.add(temp[j]);
+          }
+        }
 
-      // // set genres as keys
-      // let genres = [];
-      // for (let i of genre_list) {
-      //   genres[i] = [];
-      // }
+      // set genres as keys
+      var genres = {};
 
-      // // adding all relevant data to the genres dictionary
-      // for (i = 0; i < data.length; i++) {
-      //   let temp = data[i].Genres.split(",")[0];
-      //   genres[temp].push(data[i]);
-      // }
+      for (let i of genre_list) {
+        genres[i] = [];
+      }
 
+      // adding all relevant data to the genres dictionary
+      for (i = 0; i < data.length; i++) {
+        let temp = data[i].Genres.split(",")[0];
+        genres[temp].push(data[i]);
+      }
+
+
+      // if genre is defined, meaning we came from cluster screen
+      if (genre) {
+        data = genres[genre]
+      }
+      console.log(data)
 
       // creating age set and adding distinct genres
       const age_list = new Set();
-      for (i = 0; i < 16743; i++) {
+      for (i = 0; i < data.length; i++) {
           let temp = data[i].Age.split(",");
           for (j = 0; j < temp.length; j++) {
               age_list.add(temp[j]);
@@ -238,6 +247,10 @@
 
       //convert age set to age array
       let age_array = Array.from(age_list);
+      var tooltip = d3.select("body")
+        .append("div")
+          .attr("class", "tooltip")
+          .style("opacity", 0);
       
       // Add X axis
       var x = d3.scalePoint()
@@ -267,6 +280,20 @@
           .attr("cy", function (d) { return y(d.IMDb); } )
           .attr("r", 1.5)
           .style("fill", "#69b3a2")
+          .on("mouseover", function(d) {
+            tooltip.transition()
+              .duration(200)
+              .style("opacity", .9);
+            tooltip
+              .html(d.Title + " - " + d.Year + ", " + d.Age + "<br/>" + "IMDb Score: " + d.IMDb + "<br/>" + "Runtime: " + d.Runtime + " minutes")
+              .style("left", (d3.event.pageX + 5) + "px")
+              .style("top", (d3.event.pageY -28) + "px");
+          })
+          .on("mouseout", function(d) {
+            tooltip.transition()
+              .duration(500)
+              .style("opacity", 0);
+          });
 
       
       d3.selectAll(".platform").on("change",update);
@@ -367,6 +394,20 @@
             .attr("cy", function (d) { return y(d.IMDb); } )
             .attr("r", 1.5)
             .style("fill", "#69b3a2")
+            .on("mouseover", function(d) {
+              tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+              tooltip
+                .html(d.Title + " - " + d.Year + ", " + d.Age + "<br/>" + "IMDb Score: " + d.IMDb + "<br/>" + "Runtime: " + d.Runtime + " minutes")
+                .style("left", (d3.event.pageX + 5) + "px")
+                .style("top", (d3.event.pageY -28) + "px");
+            })
+            .on("mouseout", function(d) {
+              tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+            });
       }
 
     // don't remove

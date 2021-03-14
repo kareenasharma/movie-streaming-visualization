@@ -77,6 +77,7 @@
         var svg = d3.select("body")
             .append("svg")
                 .attr("viewBox", `-${width / 2} -${height / 2} ${width} ${height}`)
+                // .attr("viewBox", `0 0 ${width} ${height}`)
                 .style("margin", "0 -14px")
                 // .attr("width", width + margin.left + margin.right)
                 // .attr("height", height + margin.top + margin.bottom)
@@ -96,7 +97,7 @@
                 .attr("fill", d => d === root ? "white" : col(d))
                 .attr("opacity", d => d.children ? 1 : 0)
                 .attr("pointer-events", d => !d.children ? "none" : null)
-                .on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
+                .on("mouseover", function() { d3.select(this).attr("stroke", d => d === root ? null : "#000"); })
                 .on("mouseout", function() { d3.select(this).attr("stroke", null); })
                 .on("click", (event, d) => focus !== d && (zoom(event, d), event.stopPropagation()));
                 // .append("title")
@@ -133,6 +134,7 @@
             const focus0 = focus;
 
             focus = d;
+            console.log(focus)
 
             const transition = svg.transition()
                 // .duration(event.altKey ? 7500 : 750)
@@ -150,6 +152,7 @@
                 .on("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
 
             node
+                .transition(transition)
                 .style("opacity", d => d.children === focus ? 0 : 1)
 
             console.log(d)
@@ -161,68 +164,98 @@
             let genre = d.data[0];
             console.log(genre);
             let scatterData = genres[genre];
-            console.log(scatterData.length)
+            // console.log(scatterData.length)
 
-            const age_list = new Set();
-            for (i = 0; i < 16743; i++) {
-                let temp = data[i].Age.split(",");
-                for (j = 0; j < temp.length; j++) {
-                    age_list.add(temp[j]);
-                }
-            }
-
-            //convert age set to age array
-            let age_array = Array.from(age_list);
-            console.log(age_array);
-
-            svg.selectAll("body")
-                // .update()
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g")
-                    .attr("transform",
-                        "translate(" + margin.left + "," + margin.top + ")");
-            
-            // Add X axis
-            var x = d3.scalePoint()
-                // .domain([0, 6])
-                .domain(age_array)
-                .range([ 0, width ]);
-            svg.append("g")
-                .attr("transform", "translate(0," + height + ")")
-                .call(d3.axisBottom(x));
-            
-            // Add Y axis
-            var y = d3.scaleLinear()
-                .domain([0, 10])
-                .range([ height, 0]);
-            svg.append("g")
-                .call(d3.axisLeft(y));
-            
-            // node
-            //     .exit()
-            //         .remove()
-            // svg.selectAll("body")
-            //     // .update()
-            //     .attr("width", width + margin.left + margin.right)
-            //     .attr("height", height + margin.top + margin.bottom)
-            //     .append("g")
-            //         .attr("transform",
-            //             "translate(" + margin.left + "," + margin.top + ")");
-
-            let circle = svg.selectAll("circle")    
-                .data(scatterData)
-                .transition()
-                .duration(2000)
-                // .update()
-                // .append("circle")
-                    .attr("cx", function (d) { return x(d.Age); } )
-                    .attr("cy", function (d) { return y(d.IMDb); } )
-                    .attr("r", 1.5)
-                    .style("fill", "#69b3a2")
-            
-            
+            node
+                .transition().duration(2000)
+                .attr("opacity", 0)
+                // .on("end", makeScatterplot(scatterData))
+                .on("end", function(d) {
+                    sessionStorage.setItem("genre", genre);
+                    window.location.href = "./scatterplot.html"
+                })
         }
+
+        // function makeScatterplot(scatterData) {
+        //     const age_list = new Set();
+        //     for (i = 0; i < 16743; i++) {
+        //         let temp = data[i].Age.split(",");
+        //         for (j = 0; j < temp.length; j++) {
+        //             age_list.add(temp[j]);
+        //         }
+        //     }
+
+        //     //convert age set to age array
+        //     let age_array = Array.from(age_list);
+        //     // console.log(age_array);
+
+        //     // svg.selectAll("body")
+        //     //     // .update()
+        //     //         .attr("width", width + margin.left + margin.right)
+        //     //         .attr("height", height + margin.top + margin.bottom)
+        //     //         .select("g")
+        //     //             .attr("transform",
+        //     //                 "translate(" + margin.left + "," + margin.top + ")");
+            
+        //     // Add X axis
+        //     var x = d3.scalePoint()
+        //         // .domain([0, 6])
+        //         .domain(age_array)
+        //         .range([ 0, width ]);
+        //     svg.append("g")
+        //         // .transition().duration(200)
+        //         // .attr("transform", "translate(" + "-" + width + "," + "-" + height + ")")
+        //         .attr("transform", `translate(-${width}, -${height})`)
+        //         .call(d3.axisBottom(x));
+            
+        //     // Add Y axis
+        //     var y = d3.scaleLinear()
+        //         .domain([0, 10])
+        //         .range([ height, 0]);
+        //     svg.append("g")
+        //         // .transition().duration(200)
+        //         // .attr("transform", "translate(" + "-" + width + "," + "-" + height + ")")
+        //         .attr("transform", `translate(-${width}, -${height})`)
+        //         .call(d3.axisLeft(y));
+            
+        //     // node
+        //     //     .exit()
+        //     //         .remove()
+        //     // svg.selectAll("body")
+        //     //     // .update()
+        //     //     .attr("width", width + margin.left + margin.right)
+        //     //     .attr("height", height + margin.top + margin.bottom)
+        //     //     .append("g")
+        //     //         .attr("transform",
+        //     //             "translate(" + margin.left + "," + margin.top + ")");
+
+        //     let scatter = svg.append("g")
+        //         .attr("id", "scatter")
+        //         .attr("fill", "#ccc")
+        //         .selectAll("circle")
+        //         .data(scatterData)
+
+        //     scatter
+        //         .enter()
+        //         .append("circle")
+        //             .attr("cx", function (d) { return x(d.Age); } )
+        //             .attr("cy", function (d) { return y(d.IMDb); } )
+        //             .attr("r", 1.5)
+        //             .style("fill", "#69b3a2")
+
+        //     // svg.select('g').selectAll("circle")    
+        //     //     .data(scatterData)
+        //     //     .transition()
+        //     //     .duration(2000)
+        //     //     // .update()
+        //     //     // .append("circle")
+        //     //         .attr("cx", function (d) { return x(d.Age); } )
+        //     //         .attr("cy", function (d) { return y(d.IMDb); } )
+        //     //         .attr("r", 1.5)
+        //     //         .style("fill", "#69b3a2")
+            
+            
+        // }
 
     }
 
