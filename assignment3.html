@@ -8,155 +8,161 @@
 <body>
   <!-- d3 v6 integration -->
   <script src="https://d3js.org/d3.v6.min.js"></script>
-
+  
   <script>
+    var margin = {top: 10, right: 30, bottom: 30, left: 60},
+        width = 460 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
 
-    let width = 960,
-      height = 500;
-
-    function forceCluster() {
-      const strength = 0.2;
-      let nodes;
-
-      function force(alpha) {
-        const centroids = d3.rollup(nodes, centroid, d => d.data.group);
-        const l = alpha * strength;
-        for (const d of nodes) {
-          const {x: cx, y: cy} = centroids.get(d.data.group);
-          d.vx -= (d.x - cx) * l;
-          d.vy -= (d.y - cy) * l;
-        }
-      }
-
-      force.initialize = _ => nodes = _;
-
-      return force;
-    }
-
-    function forceCollide() {
-      const alpha = 0.4; // fixed for greater rigidity!
-      const padding1 = 2; // separation between same-color nodes
-      const padding2 = 6; // separation between different-color nodes
-      let nodes;
-      let maxRadius;
-
-      function force() {
-        const quadtree = d3.quadtree(nodes, d => d.x, d => d.y);
-        for (const d of nodes) {
-          const r = d.r + maxRadius;
-          const nx1 = d.x - r, ny1 = d.y - r;
-          const nx2 = d.x + r, ny2 = d.y + r;
-          quadtree.visit((q, x1, y1, x2, y2) => {
-            if (!q.length) do {
-              if (q.data !== d) {
-                const r = d.r + q.data.r + (d.data.group === q.data.data.group ? padding1 : padding2);
-                let x = d.x - q.data.x, y = d.y - q.data.y, l = Math.hypot(x, y);
-                if (l < r) {
-                  l = (l - r) / l * alpha;
-                  d.x -= x *= l, d.y -= y *= l;
-                  q.data.x += x, q.data.y += y;
-                }
-              }
-            } while (q = q.next);
-            return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
-          });
-        }
-      }
-
-      force.initialize = _ => maxRadius = d3.max(nodes = _, d => d.r) + Math.max(padding1, padding2);
-
-      return force;
-    }
-
-    pack = (data) => d3.pack()
-        .size([width, height])
-        .padding(1)
-      (d3.hierarchy(data)
-        .sum(d => d.value))
-
-    function centroid(nodes) {
-        let x = 0;
-        let y = 0;
-        let z = 0;
-        for (const d of nodes) {
-          let k = d.r ** 2;
-          x += d.x * k;
-          y += d.y * k;
-          z += k;
-        }
-        return {x: x / z, y: y / z};
-      }
-
-    let svg = d3.select("body").append("svg")
-      .attr("width", width)
-      .attr("height", height);
-
-    let color = d3.scaleOrdinal(d3.range(10), d3.schemeCategory10)
-
+    
+    // call the function that draws
     ready();
 
 
     async function ready() {
-      let data = await d3.csv("MoviesOnStreamingPlatforms_updated.csv", function(d) {
-        return (
-          ({
-            children: Array.from(
-              d3.group(
-                Array.from({length: 1674}, (_, i) => ({
-                  group: d[_, "Genres"].split(",")[0],
-                  value: d
-                })),
-                d => d.group
-              ),
-              ([, children]) => ({children})
-            )
-          })
-        )
-      });
-      console.log("loaded data")
-      console.log(data[1]["Genres"].split(",")[0])
-      
-      const nodes = pack(data).leaves();
+      // load files async; store the values so we can use them later
+        let data = await d3.csv("MoviesOnStreamingPlatforms_updated.csv");
 
-      const simulation = d3.forceSimulation(nodes)
-          .force("x", d3.forceX(width / 2).strength(0.01))
-          .force("y", d3.forceY(height / 2).strength(0.01))
-          .force("cluster", forceCluster())
-          .force("collide", forceCollide());
+        let root = d3.hierarchy(d3.rollup(data, d => d.length, d => d.Genres.split(",")[0], d => d.Title))
+            .sum(([, value]) => value)
+            .sort((a, b) => b.value - a.value)
 
-      // const svg = d3.select(svg(width, height));
+        const pack = () => d3.pack()
+            .size([width, height])
+            .padding(1)
+        (root)
 
-      const node = svg.append("g")
-        .selectAll("circle")
-        .data(nodes)
-        .join("circle")
-          .attr("cx", d => d.x)
-          .attr("cy", d => d.y)
-          .attr("fill", d => color(d.data.group))
-          // .call(drag(simulation));
+        root = pack(data);
 
-      node.transition()
-          .delay((d, i) => Math.random() * 500)
-          .duration(750)
-          .attrTween("r", d => {
-            const i = d3.interpolate(0, d.r);
-            return t => d.r = i(t);
-          });
+        const genre_list = new Set();
+            for (i = 0; i < 16743; i++) {
+                let temp = data[i].Genres.split(",")
+                for (j = 0; j < temp.length; j++) {
+                genre_list.add(temp[j]);
+                }
+            }
+        let genre_array = Array.from(genre_list);
 
-      simulation.on("tick", () => {
-        node
-            .attr("cx", d => d.x)
-            .attr("cy", d => d.y);
-      });
+        // set genres as keys
+        var genres = {};
 
-      invalidation.then(() => simulation.stop());
+        for (let i of genre_list) {
+            genres[i] = [];
+        }
 
-      return svg.node();
+        // adding relevant data to the genres dictionary
+        for (i = 0; i < data.length; i++) {
+            let temp = data[i].Genres.split(",")[0];
+            genres[temp].push(data[i]);
+        }
+
+        function col(d) {
+            let index = genre_array.indexOf(d.data[0]);
+            let scale = d3.scaleLinear().domain([0,27]).range([0,1]);
+            return d3.interpolateViridis(scale(index));
+        }
+
+        console.log(root)
+        let focus = root;
+        let view;
+
+        var svg = d3.select("body")
+            .append("svg")
+                .attr("viewBox", `-${width / 2} -${height / 2} ${width} ${height}`)
+                .style("margin", "0 -14px")
+                .style("cursor", "pointer")
+                .on("click", (event) => zoom(event, root))
+
+        const node = svg.append("g")
+            .attr("fill", "#ccc")
+            .selectAll("circle")
+            .data(root.descendants())
+            .join("circle")
+                .attr("transform", d => `translate(${d.x},${d.y})`)
+                .attr("r", d => d.r)
+                .attr("fill", d => d === root ? "white" : col(d))
+                .attr("opacity", d => d.children ? 1 : 0)
+                .attr("pointer-events", d => !d.children ? "none" : null)
+                .on("mouseover", function() { d3.select(this).attr("stroke", d => d === root ? null : "#000"); })
+                .on("mouseout", function() { d3.select(this).attr("stroke", null); })
+                .on("click", (event, d) => focus !== d && (zoom(event, d), event.stopPropagation()));
+                
+                
+        const label = svg.append("g")
+            .attr("pointer-events", "none")
+            .attr("text-anchor", "middle")
+            .selectAll("text")
+            .data(root.descendants())
+            .join("text")
+                .style("opacity", d => d.children ? 1 : 0)
+                .style("font", function(d) { return d.r > 30 ? "10px sans-serif" : d.r > 8 ? "4.5px sans-serif" : "3px sans-serif"})
+                .style("fill-opacity", d => d.parent === root ? 1 : 0)
+                .style("display", d => d.parent === root ? "inline" : "none")
+                .text(d => d.data[0] === "" ? "Not Listed" : d.data[0]);
+
+        zoomTo([root.x, root.y, root.r * 2]);
+
+        function zoomTo(v) {
+            const k = width / v[2];
+
+            view = v;
+
+            label.attr("transform", d => d.r > 8 ? `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})` 
+                : d.x > 200 ? `translate(${(d.x - v[0] + 15) * k},${(d.y - v[1]) * k})`
+                    : `translate(${(d.x - v[0] - 15) * k},${(d.y - v[1]) * k})`);
+            node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+            node.attr("r", d => d.r * k);
+        }
+
+        function zoom(event, d) {
+            const focus0 = focus;
+
+            focus = d;
+            console.log(focus)
+
+            const transition = svg.transition()
+                .duration(750)
+                .tween("zoom", d => {
+                    const i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2]);
+                    return t => zoomTo(i(t));
+                });
+
+            label
+                .filter(function(d) { return d.parent === focus || this.style.display === "inline"; })
+                .transition(transition)
+                .style("fill-opacity", d => d.parent === focus ? 1 : 0)
+                .on("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
+                .on("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
+
+            node
+                .transition(transition)
+                .style("opacity", d => d.children === focus ? 0 : 1)
+
+            console.log(d)
+
+            return toScatterplot(d);
+        }
+
+        function toScatterplot(d) {
+            let genre = d.data[0];
+            console.log(genre);
+            let scatterData = genres[genre];
+
+            node
+                .transition().duration(2000)
+                .attr("opacity", 0)
+                // .on("end", makeScatterplot(scatterData))
+                .on("end", function(d) {
+                    sessionStorage.setItem("genre", genre);
+                    window.location.href = "./scatterplot.html"
+                })
+        }
+
     }
 
+   
 
   </script>
 
-  
 </body>
 </html>

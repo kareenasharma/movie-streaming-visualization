@@ -35,14 +35,21 @@
 
 .slider-container {
     width: 30%;
-    margin-left: 65%;
-    margin-top: 2%;
+    /* margin-left: 65%; */
+    /* margin-top: 20%; */
 }
 
 #range-label{
     margin-left: 65%;
+    margin-top: 10%;
 }
 
+#slider-label{
+    /* margin-left: 65%; */
+    margin-top: 10%;
+    margin-left: 65%;
+    font-size: 32px;
+}
 
 
 .header{

@@ -15,14 +15,16 @@
 
 <body>
 
-<div id="slider-container" class = "platform">
-  <div id="range-label">1902 - 2020</div>
-</div>
+<!-- <div class="slider"> -->
+  <!-- <div id="slider-header">
+    <h2> Year </h2>
+  </div> -->
+  <div id="slider-container" class="platform">
+    <div id="slider-label">Year</div>
+    <div id="range-label">1902 - 2020</div>
+  </div>
+<!-- </div> -->
 
-<!-- <div class="slidecontainer" style='--a: -30; --b: 20; --min: -50; --max: 50'>
-  <input type="range" min="1" max="100" value="50" id="a">
-  <input type="range" min="1" max="100" value="50" id="b">
-</div> -->
 
 
 
@@ -35,25 +37,11 @@
 
 <script>
 
-
-//   d3.select('#slider3').call(d3.slider().axis(true).value( [ 10, 25 ] )
-//     .on("slide", function(evt, value) {
-//       d3.select('#slider3textmin').text(value[ 0 ]);
-//       d3.select('#slider3textmax').text(value[ 1 ]);
-// })
-
-  // let circle, newCircle;
     var genre = sessionStorage.getItem("genre");
     console.log(genre)
-    // d3.select('.genreTitle').appendHTML({genre});
-    var header = d3.select("body")
-      .append("div")
-      .attr("class", "header")
-    
-    header.html("Selected Genre:" + genre)
     
     // set the dimensions and margins of the graph
-    var margin = {top: 10, right: 40, bottom: 40, left: 60},
+    var margin = {top: 30, right: 40, bottom: 55, left: 60},
         width = 630 - margin.left - margin.right,
         height = 600 - margin.top - margin.bottom;
     
@@ -68,15 +56,6 @@
     
     //Read the data
     d3.csv("MoviesOnStreamingPlatforms_updated.csv", function(data) {
-
-      // creating language set and adding distinct languages
-      // const language_list = new Set();
-      // for (i = 0; i < 16743; i++) {
-      //   let temp = data[i].Language.split(",")
-      //   for (j = 0; j < temp.length; j++) {
-      //     language_list.add(temp[j]);
-      //   }
-      // }
 
       // create genre_list SET
       const genre_list = new Set();
@@ -103,7 +82,6 @@
         genres[temp].push(data[i]);
       }
 
-
       // if genre is defined, meaning we came from cluster screen
       if (genre) {
         data = genres[genre]
@@ -128,31 +106,13 @@
 
       // age keys
       let ageKeys = ["", "Not Listed", "all", "7+", "13+", "16+", "18+"];
-    
-
-      let ageDictionary = {
-        0 : "",
-        1 : "all",
-        2 : "7+",
-        3: "13+",
-        4: "16+",
-        5: "18+"
-      }
-
-
-
-      
+   
 
       // Add X axis
       var x = d3.scalePoint()
-        // .domain([0, 6])
-        // .domain([-0.1, (age_array.length - 1) * 1.1])
         .domain(ageKeys)
         .range([ 0, width ]);
 
-      // let xaxisGenerator = d3.axisBottom(x)
-      //   .ticks(7)
-      //   .tickValues(["", "all", "7+", "13+", "16+","18+"])
 
       svg.append("g")
         .attr("transform", "translate(0," + height + ")")
@@ -179,11 +139,18 @@
         .style("text-anchor", "middle")
         .text("IMDb Scores");
       
+      svg.append("text")
+        .attr("x", (width / 2))             
+        .attr("y", 0 - (margin.top / 2))
+        .attr("text-anchor", "middle")  
+        .style("font-size", "16px") 
+        .style("text-decoration", "underline")  
+        .text("Movies in Genre (" + genre + ") by IMDb score and Age rating");
+      
       // Add circles
       svg.append('g')
         .attr("id", "circles")
         .selectAll("circle")
-        // circle
         .data(data)
         .enter()
         .append("circle")
@@ -251,22 +218,15 @@
             choices.includes(d.Disney == 1 ? "Disney" : 0) ||
             choices.includes(d.Prime == 1 ? "Prime" : 0)
 
-          // if (choices.length == 0 || subgenreChoices.length == 0) {
-          //     return platforms || checker(dataGenres, subgenreChoices)
-          // }
-
           if ((choices.length > 0) && (subgenreChoices.length == 0)) {
-            // console.log(choices)
             return platforms
           }
 
           else if ((choices.length == 0) && (subgenreChoices.length > 0)) {
-              // console.log("checker")
               return checker(dataGenres, subgenreChoices)
           }
 
           else {
-              // console.log(checker(dataGenres, subgenreChoices))
               return platforms && checker(dataGenres, subgenreChoices)
               }
           }
@@ -277,7 +237,6 @@
           newData = data;     
         }
 
-      // }); 
         
         sliderData = newData;
         let returnSlider = slider.onChange(function(newRange){
@@ -310,7 +269,6 @@
         circle
           .on("mouseover", function(d,i){ d3.select(this).attr("r", 5);
               tooltip.transition()
-                
                 .duration(200)
                 .style("opacity", .9);
               tooltip
@@ -322,17 +280,8 @@
                 .duration(500)
                 .style("opacity", 0);
             });
-
-        // circle
-        //   .enter()
-        //   .append("circle")
-        //     .attr("cx", function (d) { return x(d.Age); } )
-        //     .attr("cy", function (d) { return y(d.IMDb); } )
-        //     .attr("r", 5)
-        //     .style("fill", "#69b3a2")
       }
 
-    // don't remove
     })
     
     </script>
