@@ -2,6 +2,7 @@
 Teammates: Laura Wiseman (@laurawiseman) and Kareena Sharma 
 
 About:
+
 Users can use this interactive visualization to help them pick a movie to watch which is available on their streaming platform of choice. This visualization also allows users to compare the movie selections available between various streaming platforms. 
 
 Instructions:
